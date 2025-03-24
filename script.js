@@ -1,55 +1,60 @@
-body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0;
-}
-.container {
-    text-align: center;
-    padding: 20px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-label {
-    display: block;
-    margin: 10px 0 5px;
-}
-input, select, button {
-    padding: 10px;
-    margin: 5px 0;
-    width: 200px;
-    box-sizing: border-box;
-}
-input[type="color"] {
-    width: 100px;
-    height: 40px;
-    padding: 0;
-}
-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-button:hover {
-    background-color: #0056b3;
-}
-#qrOutput {
-    margin-top: 20px;
-    position: relative;
-}
-#qrTextOverlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: black;
-    font-size: 16px;
-    text-align: center;
-    width: 100%;
+function generateQR() {
+    const type = document.getElementById("qrType").value;
+    const input = document.getElementById("qrInput").value;
+    const color = document.getElementById("qrColor").value;
+    let bgColor = document.getElementById("bgColor").value;
+    const transparentBg = document.getElementById("transparentBg").checked;
+    const gradientBg = document.getElementById("gradientBg").checked;
+    const qrText = document.getElementById("qrText").value;
+    const qrOutput = document.getElementById("qrOutput");
+    qrOutput.innerHTML = "";
+
+    if (!input) {
+        alert("Please enter some content!");
+        return;
+    }
+
+    let qrContent = input;
+    if (type === "vcard") {
+        qrContent = `BEGIN:VCARD\nVERSION:3.0\nN:${input.split(",")[0] || ""}\nFN:${input.split(",")[0] || ""}\nTEL:${input.split(",")[1] || ""}\nEMAIL:${input.split(",")[2] || ""}\nEND:VCARD`;
+    } else if (type === "phone") {
+        qrContent = `tel:${input}`;
+    } else if (type === "links") {
+        qrContent = input.split(",").map(link => link.trim()).join("\n");
+    }
+
+    if (transparentBg) bgColor = "transparent";
+    const qr = new QRCode(qrOutput, {
+        text: qrContent,
+        width: 200,
+        height: 200,
+        colorDark: color,
+        colorLight: gradientBg ? "transparent" : bgColor,
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    setTimeout(() => {
+        const qrCanvas = qrOutput.querySelector("canvas");
+        if (gradientBg && !transparentBg) {
+            const ctx = qrCanvas.getContext("2d");
+            const gradient = ctx.createLinearGradient(0, 0, 200, 200);
+            gradient.addColorStop(0, "#ff9999");
+            gradient.addColorStop(1, "#99ccff");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 200, 200);
+            qr.makeCode(qrContent); // Redraw QR over gradient
+        }
+        if (qrText) {
+            const textDiv = document.createElement("div");
+            textDiv.id = "qrTextOverlay";
+            textDiv.innerText = qrText;
+            qrOutput.appendChild(textDiv);
+        }
+        const downloadLink = document.createElement("a");
+        downloadLink.href = qrCanvas.toDataURL("image/png");
+        downloadLink.download = "myqrcode.png";
+        downloadLink.innerText = "Download QR Code";
+        downloadLink.style.display = "block";
+        qrOutput.appendChild(downloadLink);
+    }, 100);
 }
