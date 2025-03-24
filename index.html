@@ -9,12 +9,28 @@
 <body>
     <div class="container">
         <h1>MYQRCODE</h1>
-        <input type="text" id="qrInput" placeholder="Enter URL or text">
-        <select id="qrColor">
-            <option value="#000000">Black</option>
-            <option value="#ff0000">Red</option>
-            <option value="#00ff00">Green</option>
+        <label for="qrType">Choose Type:</label>
+        <select id="qrType">
+            <option value="url">URL</option>
+            <option value="vcard">vCard</option>
+            <option value="phone">Phone Number</option>
+            <option value="pdf">PDF Link</option>
+            <option value="audio">Audio Link</option>
+            <option value="image">Image Link</option>
+            <option value="links">List of Links</option>
+            <option value="app">App Link</option>
         </select>
+        <div id="inputArea">
+            <input type="text" id="qrInput" placeholder="Enter URL, phone, link, etc.">
+        </div>
+        <label for="qrColor">QR Color:</label>
+        <input type="color" id="qrColor" value="#000000">
+        <label for="bgColor">Background:</label>
+        <input type="color" id="bgColor" value="#ffffff">
+        <label><input type="checkbox" id="transparentBg"> Transparent Background</label>
+        <label><input type="checkbox" id="gradientBg"> Gradient Background</label>
+        <label for="qrText">Add Text:</label>
+        <input type="text" id="qrText" placeholder="Optional text">
         <button onclick="generateQR()">Generate QR</button>
         <div id="qrOutput"></div>
     </div>
